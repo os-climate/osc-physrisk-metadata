@@ -5,7 +5,7 @@ To run this script uncomment the following lines in the
 ``[options.entry_points]`` section in ``setup.cfg``::
 
     console_scripts =
-         fibonacci = osc_physrisk_financial.skeleton:run
+         fibonacci = osc_physrisk_metadata.skeleton:run
 
 Then run ``pip install .`` (or ``pip install -e .`` for editable mode)
 which will install the command ``fibonacci`` inside your current environment.
@@ -28,7 +28,7 @@ import argparse
 import logging
 import sys
 
-from osc_physrisk_financial import __version__
+from osc_physrisk_metadata import __version__
 
 __author__ = "github-actions[bot]"
 __copyright__ = "github-actions[bot]"
@@ -40,7 +40,7 @@ _logger = logging.getLogger(__name__)
 # ---- Python API ----
 # The functions defined in this section can be imported by users in their
 # Python scripts/interactive interpreter, e.g. via
-# `from osc_physrisk_financial.skeleton import fib`,
+# `from osc_physrisk_metadata.skeleton import fib`,
 # when using this Python module as a library.
 
 
@@ -148,6 +148,6 @@ if __name__ == "__main__":
     # After installing your project with pip, users can also run your Python
     # modules as scripts via the ``-m`` flag, as defined in PEP 338::
     #
-    #     python -m osc_physrisk_financial.skeleton 42
+    #     python -m osc_physrisk_metadata.skeleton 42
     #
     run()
