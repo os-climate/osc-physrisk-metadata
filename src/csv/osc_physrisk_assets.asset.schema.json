@@ -231,6 +231,5 @@
       "title": "OSC Owner LEI ID",
       "description": "the owning entity's LEI ID of this item if known, otherwise NULL."
     }
-
   ]
 }

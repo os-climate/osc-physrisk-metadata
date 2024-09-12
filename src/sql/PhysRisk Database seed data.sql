@@ -1238,5 +1238,3 @@ FROM
 	osc_physrisk_vulnerability_analysis.geolocated_precalculated_vulnerability
 WHERE std_geo_h3_index = '1234'
 	;
-
-
