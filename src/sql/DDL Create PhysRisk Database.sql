@@ -5,8 +5,6 @@
 -- The backend schema User and Tenant tables are derived from ASP.NET Boilerplate tables (https://aspnetboilerplate.com/). That code is available under the MIT license, here: https://github.com/aspnetboilerplate/aspnetboilerplate
 
 -- Last Updated: 2024-09-19. 
--- Change column prefix. Add reporting standards and country lookup tables. Make VARCHAR(256) => VARCHAR(255). Specify in column names that times are in UTC. Split impact assessment into two stages: "1. vulnerability analysis" then "2. financial_impact"
--- Fix duplicate value_dynamics column
 
 -- SETUP EXTENSIONS
 CREATE EXTENSION IF NOT EXISTS postgis; -- used for geolocation
