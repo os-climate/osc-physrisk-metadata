@@ -42,7 +42,7 @@ repos:
           ['--no-error-on-unmatched-pattern', '--ignore-unknown']
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: 586c3ea3f51230da42bab657c6a32e9e66c364f0  # frozen: v0.44.0
+    rev: 192ad822316c3a22fb3d3cc8aa6eafa0b8488360  # frozen: v0.45.0
     hooks:
       - id: markdownlint
         args: ["--fix"]
@@ -78,7 +78,7 @@ repos:
           ignore-from-file: [.gitignore],}"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: f0fe93c067104b76ffb58852abe79673a8429bd1  # frozen: v0.11.8
+    rev: 8a948e557ca98afa9489998ad0b85515964df9c4  # frozen: v0.12.0
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --config=pyproject.toml]
@@ -94,7 +94,7 @@ repos:
           then /bin/mkdir .mypy_cache; fi; exit 0'
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "f40886d54c729f533f864ed6ce584e920feb0af7"  # frozen: v1.15.0
+    rev: "0f86793af5ef5f6dc63c8d04a3cabfa3ea8f9c6a"  # frozen: v1.16.1
     hooks:
       - id: mypy
         verbose: true
