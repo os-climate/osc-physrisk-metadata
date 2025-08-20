@@ -11,7 +11,7 @@ exclude: |
 repos:
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -59,13 +59,13 @@ repos:
         args: ["--ignore=E006,E011"]
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: a23f6b85d0fdd5bb9d564e2579e678033debbdff  # frozen: v0.10.0.1
+    rev: 745eface02aef23e168a8afb6b5737818efbea95  # frozen: v0.11.0.1
     hooks:
       - id: shellcheck
         args: ["-x"]  # Check external files
 
   - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
-    rev: a185be0fd5b45112845b700d91b81050c75579e2  # frozen: v1.7.7.23
+    rev: f999ae59ac949d9b57aaa5569c2d60eb846b3a00  # frozen: v1.7.7.24
     hooks:
       - id: actionlint
 
@@ -78,7 +78,7 @@ repos:
           ignore-from-file: [.gitignore],}"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 6c5418a077bd954e7078087a655421b85772095b  # frozen: v0.12.4
+    rev: 54a455f7ce629598b7535ff828fd5fb796f4b83f  # frozen: v0.12.9
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix, --config=pyproject.toml]
@@ -94,7 +94,7 @@ repos:
           then /bin/mkdir .mypy_cache; fi; exit 0'
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "850d8bf806620ef89a99381c5cf5ea2c1ea826dd"  # frozen: v1.17.0
+    rev: "412de98d50e846f31ea6f4b0ad036f2c24a7a024"  # frozen: v1.17.1
     hooks:
       - id: mypy
         verbose: true
