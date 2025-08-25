@@ -9,11 +9,11 @@ INNER JOIN osc_physrisk_model.scenario b ON a.core_id = b.core_translated_from_i
 WHERE b.core_culture='es'  ;
 
 -- QUERY BY core_tags EXAMPLE: FIND ASSETS WITH A CERTAIN NAICS OR OED OCCUPANCY VALUE (SHOWS HOW TO SUPPORT MULTIPLE STANDARDS)
-SELECT a.core_name_full,  a.core_description_full, a.core_tags, b.core_name_short as asset_class FROM osc_physrisk_assets.asset_powergeneratingutility a INNER JOIN osc_physrisk_assets.asset_class b ON a.core_id = b.core_id
+SELECT a.core_name_full,  a.core_description_full, a.core_tags, b.core_name_short as asset_class FROM osc_physrisk_asset.asset_powergeneratingutility a INNER JOIN osc_physrisk_asset.asset_class b ON a.core_id = b.core_id
 --WHERE a.core_tags -> 'naics'='22111' OR a.core_tags -> 'oed:occupancy:oed_code'='1300' OR a.core_tags -> 'oed:occupancy:air_code'='361' 
 ;
 
-SELECT a.core_name_full,  a.core_description_full, a.core_tags, b.core_name_short as asset_class FROM osc_physrisk_assets.asset_powergeneratingutility a INNER JOIN osc_physrisk_assets.asset_class b ON a.core_id = b.core_id
+SELECT a.core_name_full,  a.core_description_full, a.core_tags, b.core_name_short as asset_class FROM osc_physrisk_asset.asset_powergeneratingutility a INNER JOIN osc_physrisk_asset.asset_class b ON a.core_id = b.core_id
 WHERE a.core_tags -> 'naics' =  '53'
  ;
 
@@ -49,17 +49,17 @@ WHERE haz.core_id = 'd08db675-ee1e-48fe-b9e1-b0da27de8f2b'
 --;
 
 -- SELECT DIFFERENT ASSET TYPES
-SELECT b.core_name_short as "Asset Class", a.core_name_short as "Asset Type", a.core_description_full as "Asset Type Description", b.core_tags as "Asset Class Tags", a.core_tags as "Asset Type Tags" FROM osc_physrisk_assets.asset_type a INNER JOIN osc_physrisk_assets.asset_class b ON a.asset_class_id = b.core_id
+SELECT b.core_name_short as "Asset Class", a.core_name_short as "Asset Type", a.core_description_full as "Asset Type Description", b.core_tags as "Asset Class Tags", a.core_tags as "Asset Type Tags" FROM osc_physrisk_asset.asset_type a INNER JOIN osc_physrisk_asset.asset_class b ON a.asset_class_id = b.core_id
 WHERE b.core_tags -> 'naics' @>  '45'
 --WHERE b.core_tags ->> 'oed:occupancy:oed_code' = '1100'
 ORDER BY b.core_name_short ASC
 ;
 
-SELECT * from osc_physrisk_assets.generic_asset; -- NOTICE THESE ARE THE GENERIC ASSET COLUMNS AND ALL ASSETS ARE RETURNED
-SELECT core_name_full, value_loan, value_ltv from osc_physrisk_assets.asset_realestate; -- NOTICE THE COLUMNS INCLUDE RE-SPECIFIC FIELDS AND ONLY RE ASSETS ARE RETURNED
-SELECT core_name_full, production, capacity, availability_rate from osc_physrisk_assets.asset_powergeneratingutility; -- NOTICE THE COLUMNS INCLUDE UTILITY-SPECIFIC FIELDS AND ONLY UTILITY ASSETS ARE RETURNED
+SELECT * from osc_physrisk_asset.generic_asset; -- NOTICE THESE ARE THE GENERIC ASSET COLUMNS AND ALL ASSETS ARE RETURNED
+SELECT core_name_full, value_loan, value_ltv from osc_physrisk_asset.asset_realestate; -- NOTICE THE COLUMNS INCLUDE RE-SPECIFIC FIELDS AND ONLY RE ASSETS ARE RETURNED
+SELECT core_name_full, production, capacity, availability_rate from osc_physrisk_asset.asset_powergeneratingutility; -- NOTICE THE COLUMNS INCLUDE UTILITY-SPECIFIC FIELDS AND ONLY UTILITY ASSETS ARE RETURNED
 
 -- WE CAN ALSO DO A JOIN BY ASSET CLASS TO FILTER THE RESULTS
-SELECT * from osc_physrisk_assets.generic_asset a INNER JOIN osc_physrisk_assets.asset_class b ON a.core_id = b.core_id
+SELECT * from osc_physrisk_asset.generic_asset a INNER JOIN osc_physrisk_asset.asset_class b ON a.core_id = b.core_id
 WHERE b.core_name_short LIKE '%Utility%'
 ; -- NOTICE ONLY UTILITY ROW IS RETURNED
