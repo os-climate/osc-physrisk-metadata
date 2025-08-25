@@ -807,6 +807,7 @@ CREATE TABLE osc_physrisk_assets.asset_type (
 );
 COMMENT ON TABLE osc_physrisk_assets.asset_type IS 'A physical financial asset (infrastructure, utilities, property, buildings) specific classification within an overarching asset class, that may impact the modeling (ex commercial real estate vs residential real, both of which types belong to the same real estate class).';
 
+
 CREATE TABLE osc_physrisk_assets.construction_type (
 	core_id uuid NOT NULL,
 	core_name_short varchar(50),
@@ -850,6 +851,47 @@ CREATE INDEX "IX_construction_type_core_user_creator_id" ON osc_physrisk_assets.
 CREATE INDEX "IX_construction_type_core_user_deleter_id" ON osc_physrisk_assets.construction_type USING btree (core_user_deleter_id);
 CREATE INDEX "IX_construction_type_core_user_last_modifier_id" ON osc_physrisk_assets.construction_type USING btree (core_user_last_modifier_id);
 CREATE UNIQUE INDEX "PK_construction_type" ON osc_physrisk_assets.construction_type USING btree (core_id);
+
+CREATE TABLE osc_physrisk_assets.building_system (
+	core_id uuid NOT NULL,
+	core_name_short varchar(50),
+	core_name_full varchar(255),
+	core_name_suffix varchar(12),
+	core_name_prefix varchar(12),
+	core_description_short varchar(255),
+	core_description_full varchar(8096),
+	core_tags jsonb,
+	core_temporal_datetime_utc_created timestamptz NOT NULL,
+	core_user_creator_id bigint,
+	core_temporal_datetime_utc_last_modified timestamptz,
+	core_user_last_modifier_id bigint,
+	core_is_deleted bool NOT NULL,
+	core_user_deleter_id bigint,
+	core_temporal_datetime_utc_deleted timestamptz,
+	core_culture varchar(5),
+	core_checksum varchar(64),
+	core_seq_num integer,
+	core_translated_from_id uuid,
+	core_is_active bool NOT NULL,
+	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
+	content_collection_ids _uuid,
+	PRIMARY KEY (core_id),
+	CONSTRAINT fk_building_system_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_building_system_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_building_system_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
+ 	CONSTRAINT fk_building_system_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
+);
+COMMENT ON TABLE osc_physrisk_assets.building_system IS 'The type of internal components (HVAC, elevator, fire, electrical, etc) that an asset contains, helpful for determining vulnerability or exposure.';
+
+CREATE INDEX "IX_building_system_core_checksum" ON osc_physrisk_assets.building_system USING btree (core_checksum);
+CREATE INDEX "IX_building_system_core_culture" ON osc_physrisk_assets.building_system USING btree (core_culture);
+CREATE INDEX "IX_building_system_core_data_set_id" ON osc_physrisk_assets.building_system USING btree (core_data_set_id);
+CREATE INDEX "IX_building_system_core_id" ON osc_physrisk_assets.building_system USING btree (core_id);
+CREATE INDEX "IX_building_system_core_user_creator_id" ON osc_physrisk_assets.building_system USING btree (core_user_creator_id);
+CREATE INDEX "IX_building_system_core_user_deleter_id" ON osc_physrisk_assets.building_system USING btree (core_user_deleter_id);
+CREATE INDEX "IX_building_system_core_user_last_modifier_id" ON osc_physrisk_assets.building_system USING btree (core_user_last_modifier_id);
+CREATE UNIQUE INDEX "PK_building_system" ON osc_physrisk_assets.building_system USING btree (core_id);
+
 
 CREATE TABLE osc_physrisk_assets.generic_asset (
 	core_id uuid DEFAULT gen_random_UUID ()  NOT NULL,
@@ -898,6 +940,7 @@ CREATE TABLE osc_physrisk_assets.generic_asset (
 	core_spatial_h3_resolution integer,
 	core_spatial_overture_gers_id uuid,
 	core_spatial_overture_features jsonb,
+	number_stories integer,
 	parent_name text,
 	core_temporal_datetime_utc_effective timestamptz,
 	core_temporal_datetime_utc_start timestamptz,
@@ -915,6 +958,15 @@ CREATE TABLE osc_physrisk_assets.generic_asset (
 );
 COMMENT ON TABLE osc_physrisk_assets.generic_asset IS 'A physical financial asset (infrastructure, utilities, property, buildings) that is contained within a financial portfolio and not further classified by its Asset Type (otherwise use a more specific, relevant table). The lowest unit of assessment for physical risk & resilience (currently).';
 
+CREATE TABLE osc_physrisk_assets.bridge_asset_building_system (
+	asset_id uuid NOT NULL,
+	building_system_id uuid NOT NULL,
+	details_json jsonb,
+	PRIMARY KEY (asset_id,building_system_id),
+	CONSTRAINT fk_bridge_asset_building_system_asset_id FOREIGN KEY ( asset_id ) REFERENCES osc_physrisk_assets.generic_asset(core_id),	
+	CONSTRAINT fk_bridge_asset_building_system_building_system_id FOREIGN KEY ( building_system_id ) REFERENCES osc_physrisk_assets.building_system(core_id)
+);
+COMMENT ON TABLE osc_physrisk_assets.bridge_asset_building_system IS 'Many-to-many bridge between an asset and its internal components (HVAC, elevator, fire, electrical, etc) that an asset contains, helpful for determining vulnerability or exposure.';
 
 CREATE TABLE osc_physrisk_assets.asset_construction (
 	core_id uuid NOT NULL,
