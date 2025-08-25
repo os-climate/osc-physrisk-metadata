@@ -5,14 +5,27 @@
 -- The backend schema User and Tenant tables are derived from ASP.NET Boilerplate tables (https://aspnetboilerplate.com/). That code is available under the MIT license, here: https://github.com/aspnetboilerplate/aspnetboilerplate
 
 -- DELETE ALL FROM MODEL AND BASE TABLES
+delete from osc_physrisk_asset_surrounding.asset_surrounding_ring where 1=1;
+delete from osc_physrisk_asset_surrounding.class_defensible_space where 1=1;
+delete from osc_physrisk_asset_surrounding.class_impervious_ratio where 1=1;
+delete from osc_physrisk_asset_surrounding.class_land_cover where 1=1;
+delete from osc_physrisk_asset_surrounding.class_land_use where 1=1;
+delete from osc_physrisk_asset_surrounding.class_tree_canopy_ratio where 1=1;
+delete from osc_physrisk_asset_surrounding.class_slope where 1=1;
+delete from osc_physrisk_asset_surrounding.class_vegetation where 1=1;
+delete from osc_physrisk_asset_surrounding.class_water_distance where 1=1;
+delete from osc_physrisk_asset_surrounding.perimeter_ring where 1=1;
+
 delete from osc_physrisk_asset.asset_realestate where 1=1;
 delete from osc_physrisk_asset.asset_powergeneratingutility where 1=1;
 delete from osc_physrisk_asset.generic_asset where 1=1;
-delete from osc_physrisk_asset.portfolio where 1=1;
 delete from osc_physrisk_asset.bridge_portfolio_asset where 1=1;
+delete from osc_physrisk_asset.portfolio where 1=1;
 delete from osc_physrisk_asset.asset_type where 1=1;
 delete from osc_physrisk_asset.asset_class where 1=1;
 delete from osc_physrisk_asset.construction_type where 1=1;
+delete from osc_physrisk_asset.bridge_asset_building_system where 1=1;
+delete from osc_physrisk_asset.building_system where 1=1;
 delete from osc_physrisk_model.scenario where 1=1;
 delete from osc_physrisk_model.hazard_indicator where 1=1;
 delete from osc_physrisk_model.hazard_indicator_type where 1=1;
@@ -22,6 +35,7 @@ delete from osc_physrisk_model.hazard_model where 1=1;
 delete from osc_physrisk_model.hazard where 1=1;
 delete from osc_physrisk_model.peril where 1=1;
 delete from osc_physrisk_model.vulnerability_model where 1=1;
+
 
 delete from osc_physrisk_org.organization where 1=1;
 delete from osc_physrisk_org.organization_division where 1=1;
@@ -90,6 +104,7 @@ INSERT INTO osc_physrisk_asset_surrounding.class_water_distance (core_data_set_i
 INSERT INTO osc_physrisk_asset_surrounding.class_slope (core_data_set_id, core_translated_from_id, core_name_short, core_name_prefix, core_name_suffix, core_name_full, core_description_short, core_description_full, core_culture, core_checksum, core_seq_num, core_tags, core_is_active, core_is_deleted, core_user_deleter_id, core_temporal_datetime_utc_deleted, core_temporal_datetime_utc_last_modified, core_user_last_modifier_id, core_temporal_datetime_utc_created, core_user_creator_id, core_id) VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-616e79000000', NULL, 'Any', '', '', 'Any', 'Any', 'Any', 'en', '48858e8ba640feaf45a8736d2a808fff8dda1300be6529f310d95ab217168fb1', NULL, '{}', 'f', 'f', NULL, NULL, NULL, NULL, '2025-06-02 11:52:05', NULL, 'aaaaaaaa-aaaa-4aaa-8aaa-616e79000000');
 INSERT INTO osc_physrisk_asset_surrounding.class_slope (core_data_set_id, core_translated_from_id, core_name_short, core_name_prefix, core_name_suffix, core_name_full, core_description_short, core_description_full, core_culture, core_checksum, core_seq_num, core_tags, core_is_active, core_is_deleted, core_user_deleter_id, core_temporal_datetime_utc_deleted, core_temporal_datetime_utc_last_modified, core_user_last_modifier_id, core_temporal_datetime_utc_created, core_user_creator_id, core_id) VALUES ('bbbbbbbb-bbbb-4bbb-8bbb-6e6f6e650000', NULL, 'None', '', '', 'None', 'None', 'None', 'en', '82794840dc399765987e8d46b6d8a9a142529b0e38b5a03deb2e4e84a936a7af', NULL, '{}', 'f', 'f', NULL, NULL, NULL, NULL, '2025-06-02 11:52:05', NULL, 'bbbbbbbb-bbbb-4bbb-8bbb-6e6f6e650000');
 INSERT INTO osc_physrisk_asset_surrounding.class_slope (core_data_set_id, core_translated_from_id, core_name_short, core_name_prefix, core_name_suffix, core_name_full, core_description_short, core_description_full, core_culture, core_checksum, core_seq_num, core_tags, core_is_active, core_is_deleted, core_user_deleter_id, core_temporal_datetime_utc_deleted, core_temporal_datetime_utc_last_modified, core_user_last_modifier_id, core_temporal_datetime_utc_created, core_user_creator_id, core_id) VALUES ('ffffffff-ffff-4fff-8fff-756e6b000000', NULL, 'Unknown', '', '', 'Unknown', 'Unknown', 'Unknown', 'en', '1ea21a6506ce9cb57001b4f52ced92e939d1815ba7bd5a3fc22ad2297d0c7d76', NULL, '{}', 'f', 'f', NULL, NULL, NULL, NULL, '2025-06-02 11:52:05', NULL, 'ffffffff-ffff-4fff-8fff-756e6b000000');
+
 
 -- INSERT BUILDING SYSTEM AND CONSTRUCTION TYPES
 INSERT INTO osc_physrisk_asset.building_system (core_data_set_id, core_translated_from_id, core_name_short, core_name_prefix, core_name_suffix, core_name_full, core_description_short, core_description_full, core_culture, core_checksum, core_seq_num, core_tags, core_is_active, core_is_deleted, core_user_deleter_id, core_temporal_datetime_utc_deleted, core_temporal_datetime_utc_last_modified, core_user_last_modifier_id, core_temporal_datetime_utc_created, core_user_creator_id, core_id) VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-616e79000000', NULL, 'Any', '', '', 'Any', 'Any', 'Any', 'en', '48858e8ba640feaf45a8736d2a808fff8dda1300be6529f310d95ab217168fb1', NULL, '{}', 'f', 'f', NULL, NULL, NULL, NULL, '2025-06-02 11:52:05', NULL, 'aaaaaaaa-aaaa-4aaa-8aaa-616e79000000');
