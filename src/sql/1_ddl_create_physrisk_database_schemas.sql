@@ -13,8 +13,9 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto; -- used for random UUID generation
 CREATE SCHEMA IF NOT EXISTS osc_physrisk_backend;
 CREATE SCHEMA IF NOT EXISTS osc_physrisk_org;
 CREATE SCHEMA IF NOT EXISTS osc_physrisk_model;
+CREATE SCHEMA IF NOT EXISTS osc_physrisk_structure;
 CREATE SCHEMA IF NOT EXISTS osc_physrisk_asset;
-CREATE SCHEMA IF NOT EXISTS osc_physrisk_asset_surrounding;
+CREATE SCHEMA IF NOT EXISTS osc_physrisk_structure;
 CREATE SCHEMA IF NOT EXISTS osc_physrisk_analysis;
 
 -- SETUP TABLES
@@ -269,8 +270,7 @@ CREATE TABLE osc_physrisk_org.organization (
 	CONSTRAINT fk_organization_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_organization_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_organization_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
- 	CONSTRAINT fk_organization_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
-	
+ 	CONSTRAINT fk_organization_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)	
 );
 
 CREATE TABLE osc_physrisk_org.organization_division (
@@ -557,8 +557,7 @@ CREATE TABLE osc_physrisk_model.impact_type (
 	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
 	frequency integer NOT NULL,
 	nature integer NOT NULL,
-	financial_accounting_category integer NOT NULL,
-	
+	financial_accounting_category integer NOT NULL,	
 	PRIMARY KEY (core_id),
 	CONSTRAINT fk_impact_type_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_impact_type_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
@@ -744,8 +743,39 @@ CREATE UNIQUE INDEX "PK_scenario" ON osc_physrisk_model.scenario USING btree (co
 
 CREATE UNIQUE INDEX "PK_vulnerability_model" ON osc_physrisk_model.vulnerability_model USING btree (core_id);
 
--- -- CREATE SCHEMA osc_physrisk_asset_surrounding
-CREATE TABLE osc_physrisk_asset_surrounding.class_land_cover (
+-- -- CREATE SCHEMA osc_physrisk_structure
+CREATE TABLE osc_physrisk_structure.structure (
+	core_id uuid NOT NULL,
+	core_name_short varchar(50),
+	core_name_full varchar(255),
+	core_name_suffix varchar(12),
+	core_name_prefix varchar(12),
+	core_description_short varchar(255),
+	core_description_full varchar(8096),
+	core_tags jsonb,
+	core_temporal_datetime_utc_created timestamptz NOT NULL,
+	core_user_creator_id bigint,
+	core_temporal_datetime_utc_last_modified timestamptz,
+	core_user_last_modifier_id bigint,
+	core_is_deleted bool NOT NULL,
+	core_user_deleter_id bigint,
+	core_temporal_datetime_utc_deleted timestamptz,
+	core_culture varchar(5),
+	core_checksum varchar(64),
+	core_seq_num integer,
+	core_translated_from_id uuid,
+	core_is_active bool NOT NULL,
+	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
+	PRIMARY KEY (core_id),
+	CONSTRAINT fk_structure_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_structure_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_structure_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
+ 	CONSTRAINT fk_structure_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
+);
+COMMENT ON TABLE osc_physrisk_structure.structure IS 'A physical structure (building, shed, bridge, etc.) which may or may not be habitable, and may be vulnerable to physical risks.';
+
+
+CREATE TABLE osc_physrisk_structure.class_land_cover (
 	core_id uuid NOT NULL,
 	core_name_short varchar(50),
 	core_name_full varchar(255),
@@ -774,8 +804,8 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_land_cover (
 	CONSTRAINT fk_class_land_cover_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
  	CONSTRAINT fk_class_land_cover_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
 );
-COMMENT ON TABLE osc_physrisk_asset_surrounding.class_land_cover IS 'The land cover classification for a specific asset location. This includes information about the type of vegetation, urban development, and other land use characteristics that may influence the asset''s vulnerability to physical risks.';
-CREATE TABLE osc_physrisk_asset_surrounding.class_land_use (
+COMMENT ON TABLE osc_physrisk_structure.class_land_cover IS 'The land cover classification for a specific asset location. This includes information about the type of vegetation, urban development, and other land use characteristics that may influence the asset''s vulnerability to physical risks.';
+CREATE TABLE osc_physrisk_structure.class_land_use (
 	core_id uuid NOT NULL,
 	core_name_short varchar(50),
 	core_name_full varchar(255),
@@ -805,9 +835,9 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_land_use (
  	CONSTRAINT fk_class_land_use_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
 );
 
-COMMENT ON TABLE osc_physrisk_asset_surrounding.class_land_use IS 'The land use classification for a specific asset location. This includes information about how humans use the area surrounding the asset that may influence its vulnerability to physical risks.';
+COMMENT ON TABLE osc_physrisk_structure.class_land_use IS 'The land use classification for a specific asset location. This includes information about how humans use the area surrounding the asset that may influence its vulnerability to physical risks.';
 
-CREATE TABLE osc_physrisk_asset_surrounding.class_slope (
+CREATE TABLE osc_physrisk_structure.class_slope (
 	core_id uuid NOT NULL,
 	core_name_short varchar(50),
 	core_name_full varchar(255),
@@ -829,16 +859,15 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_slope (
 	core_translated_from_id uuid,
 	core_is_active bool NOT NULL,
 	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
-	
 	PRIMARY KEY (core_id),
 	CONSTRAINT fk_class_slope_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_class_slope_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_class_slope_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
  	CONSTRAINT fk_class_slope_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
 );
-COMMENT ON TABLE osc_physrisk_asset_surrounding.class_slope IS 'The slope classification for a specific asset location. This includes information about the steepness and stability of the terrain, which may influence the asset''s vulnerability to physical risks.';
+COMMENT ON TABLE osc_physrisk_structure.class_slope IS 'The slope classification for a specific asset location. This includes information about the steepness and stability of the terrain, which may influence the asset''s vulnerability to physical risks.';
 
-CREATE TABLE osc_physrisk_asset_surrounding.class_impervious_ratio (
+CREATE TABLE osc_physrisk_structure.class_impervious_ratio (
 	core_id uuid NOT NULL,
 	core_name_short varchar(50),
 	core_name_full varchar(255),
@@ -860,16 +889,15 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_impervious_ratio (
 	core_translated_from_id uuid,
 	core_is_active bool NOT NULL,
 	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
-	
 	PRIMARY KEY (core_id),
 	CONSTRAINT fk_class_impervious_ratio_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_class_impervious_ratio_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_class_impervious_ratio_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
  	CONSTRAINT fk_class_impervious_ratio_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
 );
-COMMENT ON TABLE osc_physrisk_asset_surrounding.class_impervious_ratio IS 'The impervious surface ratio classification for a specific asset location. This includes information about the extent of impervious surfaces, which may influence the asset''s vulnerability to physical risks.';
+COMMENT ON TABLE osc_physrisk_structure.class_impervious_ratio IS 'The impervious surface ratio classification for a specific asset location. This includes information about the extent of impervious surfaces, which may influence the asset''s vulnerability to physical risks.';
 
-CREATE TABLE osc_physrisk_asset_surrounding.class_tree_canopy_ratio (
+CREATE TABLE osc_physrisk_structure.class_tree_canopy_ratio (
 	core_id uuid NOT NULL,
 	core_name_short varchar(50),
 	core_name_full varchar(255),
@@ -891,7 +919,6 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_tree_canopy_ratio (
 	core_translated_from_id uuid,
 	core_is_active bool NOT NULL,
 	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
-	
 	PRIMARY KEY (core_id),
 	CONSTRAINT fk_class_tree_canopy_ratio_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_class_tree_canopy_ratio_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
@@ -899,9 +926,9 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_tree_canopy_ratio (
  	CONSTRAINT fk_class_tree_canopy_ratio_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
 );
 
-COMMENT ON TABLE osc_physrisk_asset_surrounding.class_tree_canopy_ratio IS 'The tree canopy classification for a specific asset location. This includes information about the extent of tree cover, which may influence the asset''s vulnerability to physical risks.';
+COMMENT ON TABLE osc_physrisk_structure.class_tree_canopy_ratio IS 'The tree canopy classification for a specific asset location. This includes information about the extent of tree cover, which may influence the asset''s vulnerability to physical risks.';
 
-CREATE TABLE osc_physrisk_asset_surrounding.class_vegetation (
+CREATE TABLE osc_physrisk_structure.class_vegetation (
 	core_id uuid NOT NULL,
 	core_name_short varchar(50),
 	core_name_full varchar(255),
@@ -923,7 +950,6 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_vegetation (
 	core_translated_from_id uuid,
 	core_is_active bool NOT NULL,
 	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
-	
 	PRIMARY KEY (core_id),
 	CONSTRAINT fk_class_vegetation_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_class_vegetation_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
@@ -931,9 +957,9 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_vegetation (
  	CONSTRAINT fk_class_vegetation_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
 );
 
-COMMENT ON TABLE osc_physrisk_asset_surrounding.class_vegetation IS 'The type of vegetation present for a specific asset location. This includes information about the vegetative species surrounding the asset that may influence its vulnerability to physical risks.';
+COMMENT ON TABLE osc_physrisk_structure.class_vegetation IS 'The type of vegetation present for a specific asset location. This includes information about the vegetative species surrounding the asset that may influence its vulnerability to physical risks.';
 
-CREATE TABLE osc_physrisk_asset_surrounding.class_water_distance (
+CREATE TABLE osc_physrisk_structure.class_water_distance (
 	core_id uuid NOT NULL,
 	core_name_short varchar(50),
 	core_name_full varchar(255),
@@ -955,7 +981,6 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_water_distance (
 	core_translated_from_id uuid,
 	core_is_active bool NOT NULL,
 	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
-	
 	PRIMARY KEY (core_id),
 	CONSTRAINT fk_class_water_distance_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_class_water_distance_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
@@ -963,9 +988,9 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_water_distance (
  	CONSTRAINT fk_class_water_distance_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
 );
 
-COMMENT ON TABLE osc_physrisk_asset_surrounding.class_water_distance IS 'The water distance classification for a specific asset location. This includes information about the proximity to water bodies, which may influence the asset''s vulnerability to physical risks.';
+COMMENT ON TABLE osc_physrisk_structure.class_water_distance IS 'The water distance classification for a specific asset location. This includes information about the proximity to water bodies, which may influence the asset''s vulnerability to physical risks.';
 
-CREATE TABLE osc_physrisk_asset_surrounding.class_defensible_space (
+CREATE TABLE osc_physrisk_structure.class_defensible_space (
 	core_id uuid NOT NULL,
 	core_name_short varchar(50),
 	core_name_full varchar(255),
@@ -987,7 +1012,6 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_defensible_space (
 	core_translated_from_id uuid,
 	core_is_active bool NOT NULL,
 	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
-	
 	PRIMARY KEY (core_id),
 	CONSTRAINT fk_class_defensible_space_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
 	CONSTRAINT fk_class_defensible_space_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
@@ -995,9 +1019,9 @@ CREATE TABLE osc_physrisk_asset_surrounding.class_defensible_space (
  	CONSTRAINT fk_class_defensible_space_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
 );
 
-COMMENT ON TABLE osc_physrisk_asset_surrounding.class_defensible_space IS 'The defensible space classification for a specific asset location. This includes information about the area surrounding the asset that may influence its vulnerability to physical risks.';
+COMMENT ON TABLE osc_physrisk_structure.class_defensible_space IS 'The defensible space classification for a specific asset location. This includes information about the area surrounding the asset that may influence its vulnerability to physical risks.';
 
-CREATE TABLE osc_physrisk_asset_surrounding.perimeter_ring (
+CREATE TABLE osc_physrisk_structure.perimeter_ring (
 	core_id uuid NOT NULL,
 	core_name_short varchar(50),
 	core_name_full varchar(255),
@@ -1019,7 +1043,6 @@ CREATE TABLE osc_physrisk_asset_surrounding.perimeter_ring (
 	core_translated_from_id uuid,
 	core_is_active bool NOT NULL,
 	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
-	
 	metres_inner numeric(8,2) NOT NULL,     -- e.g., 0.00
 	metres_outer numeric(8,2) NOT NULL,     -- e.g., 5.00
 	CHECK (metres_inner >= 0 AND metres_outer > metres_inner),
@@ -1029,9 +1052,202 @@ CREATE TABLE osc_physrisk_asset_surrounding.perimeter_ring (
 	CONSTRAINT fk_perimeter_ring_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
  	CONSTRAINT fk_perimeter_ring_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
 );
+COMMENT ON TABLE osc_physrisk_structure.perimeter_ring IS 'The perimeter ring for a specific asset location. This includes information about the area surrounding the asset that may influence its vulnerability to physical risks.';
 
-COMMENT ON TABLE osc_physrisk_asset_surrounding.perimeter_ring IS 'The perimeter ring for a specific asset location. This includes information about the area surrounding the asset that may influence its vulnerability to physical risks.';
+CREATE TABLE osc_physrisk_structure.construction_type (
+	core_id uuid NOT NULL,
+	core_name_short varchar(50),
+	core_name_full varchar(255),
+	core_name_suffix varchar(12),
+	core_name_prefix varchar(12),
+	core_description_short varchar(255),
+	core_description_full varchar(8096),
+	core_tags jsonb,
+	core_temporal_datetime_utc_created timestamptz NOT NULL,
+	core_user_creator_id bigint,
+	core_temporal_datetime_utc_last_modified timestamptz,
+	core_user_last_modifier_id bigint,
+	core_is_deleted bool NOT NULL,
+	core_user_deleter_id bigint,
+	core_temporal_datetime_utc_deleted timestamptz,
+	core_culture varchar(5),
+	core_checksum varchar(64),
+	core_seq_num integer,
+	core_translated_from_id uuid,
+	core_is_active bool NOT NULL,
+	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
+	open_exposure_data_oed_code integer NOT NULL,
+	open_exposure_data_cede_code varchar(50) NOT NULL,
+	open_exposure_data_code_range varchar(50) NOT NULL,
+	open_exposure_data_broad_category varchar(50) NOT NULL,
+	PRIMARY KEY (core_id),
+	CONSTRAINT fk_construction_type_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_construction_type_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_construction_type_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
+ 	CONSTRAINT fk_construction_type_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
+);
+COMMENT ON TABLE osc_physrisk_structure.construction_type IS 'The type of construction method or material an asset is made of, helpful for determining vulnerability or exposure.';
 
+CREATE INDEX "IX_construction_type_core_checksum" ON osc_physrisk_structure.construction_type USING btree (core_checksum);
+CREATE INDEX "IX_construction_type_core_culture" ON osc_physrisk_structure.construction_type USING btree (core_culture);
+CREATE INDEX "IX_construction_type_core_data_set_id" ON osc_physrisk_structure.construction_type USING btree (core_data_set_id);
+CREATE INDEX "IX_construction_type_core_id" ON osc_physrisk_structure.construction_type USING btree (core_id);
+CREATE INDEX "IX_construction_type_core_user_creator_id" ON osc_physrisk_structure.construction_type USING btree (core_user_creator_id);
+CREATE INDEX "IX_construction_type_core_user_deleter_id" ON osc_physrisk_structure.construction_type USING btree (core_user_deleter_id);
+CREATE INDEX "IX_construction_type_core_user_last_modifier_id" ON osc_physrisk_structure.construction_type USING btree (core_user_last_modifier_id);
+CREATE UNIQUE INDEX "PK_construction_type" ON osc_physrisk_structure.construction_type USING btree (core_id);
+
+CREATE TABLE osc_physrisk_structure.structure_component (
+	core_id uuid NOT NULL,
+	core_name_short varchar(50),
+	core_name_full varchar(255),
+	core_name_suffix varchar(12),
+	core_name_prefix varchar(12),
+	core_description_short varchar(255),
+	core_description_full varchar(8096),
+	core_tags jsonb,
+	core_temporal_datetime_utc_created timestamptz NOT NULL,
+	core_user_creator_id bigint,
+	core_temporal_datetime_utc_last_modified timestamptz,
+	core_user_last_modifier_id bigint,
+	core_is_deleted bool NOT NULL,
+	core_user_deleter_id bigint,
+	core_temporal_datetime_utc_deleted timestamptz,
+	core_culture varchar(5),
+	core_checksum varchar(64),
+	core_seq_num integer,
+	core_translated_from_id uuid,
+	core_is_active bool NOT NULL,
+	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
+	PRIMARY KEY (core_id),
+	CONSTRAINT fk_structure_component_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_structure_component_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_structure_component_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
+ 	CONSTRAINT fk_structure_component_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
+);
+COMMENT ON TABLE osc_physrisk_structure.structure_component IS 'The type of internal components (HVAC, elevator, fire, electrical, etc) that an asset contains, helpful for determining vulnerability or exposure.';
+
+CREATE INDEX "IX_structure_component_core_checksum" ON osc_physrisk_structure.structure_component USING btree (core_checksum);
+CREATE INDEX "IX_structure_component_core_culture" ON osc_physrisk_structure.structure_component USING btree (core_culture);
+CREATE INDEX "IX_structure_component_core_data_set_id" ON osc_physrisk_structure.structure_component USING btree (core_data_set_id);
+CREATE INDEX "IX_structure_component_core_id" ON osc_physrisk_structure.structure_component USING btree (core_id);
+CREATE INDEX "IX_structure_component_core_user_creator_id" ON osc_physrisk_structure.structure_component USING btree (core_user_creator_id);
+CREATE INDEX "IX_structure_component_core_user_deleter_id" ON osc_physrisk_structure.structure_component USING btree (core_user_deleter_id);
+CREATE INDEX "IX_structure_component_core_user_last_modifier_id" ON osc_physrisk_structure.structure_component USING btree (core_user_last_modifier_id);
+CREATE UNIQUE INDEX "PK_structure_component" ON osc_physrisk_structure.structure_component USING btree (core_id);
+
+CREATE TABLE osc_physrisk_structure.structure_surrounding_ring (
+	core_id uuid NOT NULL,
+	core_name_short varchar(50),
+	core_name_full varchar(255),
+	core_name_suffix varchar(12),
+	core_name_prefix varchar(12),
+	core_description_short varchar(255),
+	core_description_full varchar(8096),
+	core_tags jsonb,
+	core_temporal_datetime_utc_created timestamptz NOT NULL,
+	core_user_creator_id bigint,
+	core_temporal_datetime_utc_last_modified timestamptz,
+	core_user_last_modifier_id bigint,
+	core_is_deleted bool NOT NULL,
+	core_user_deleter_id bigint,
+	core_temporal_datetime_utc_deleted timestamptz,
+	core_culture varchar(5),
+	core_checksum varchar(64),
+	core_seq_num integer,
+	core_translated_from_id uuid,
+	core_is_active bool NOT NULL,
+	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,	
+	structure_id uuid NOT NULL,
+	perimeter_ring_id uuid NOT NULL,
+	defensible_space_class_id uuid,
+	impervious_ratio_class_id uuid,
+	impervious_ratio numeric(5,2),
+	land_cover_primary_class_id uuid,
+	land_use_primary_class_id uuid,
+	slope_class_id uuid,
+	slope_degrees numeric(5,2),
+	tree_canopy_ratio_class_id uuid,
+	tree_canopy_ratio numeric(5,2),
+	vegetation_primary_class_id uuid,
+	water_distance_class_id uuid,
+	water_distance_metres numeric(5,2),
+	PRIMARY KEY (core_id),
+	CONSTRAINT fk_structure_surrounding_ring_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_structure_surrounding_ring_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_structure_surrounding_ring_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_structure_id FOREIGN KEY ( structure_id ) REFERENCES osc_physrisk_structure.structure(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_class_perimeter_ring_id FOREIGN KEY ( perimeter_ring_id ) REFERENCES osc_physrisk_structure.perimeter_ring(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_class_defensible_space_id FOREIGN KEY ( defensible_space_class_id ) REFERENCES osc_physrisk_structure.class_defensible_space(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_class_impervious_ratio_id FOREIGN KEY ( impervious_ratio_class_id ) REFERENCES osc_physrisk_structure.class_impervious_ratio(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_class_class_primary_land_cover_id_id FOREIGN KEY ( land_cover_primary_class_id ) REFERENCES osc_physrisk_structure.class_land_cover(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_class_primary_land_use_id FOREIGN KEY ( land_use_primary_class_id ) REFERENCES osc_physrisk_structure.class_land_use(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_class_slope_id FOREIGN KEY ( slope_class_id ) REFERENCES osc_physrisk_structure.class_slope(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_class_tree_canopy_ratio_id FOREIGN KEY ( tree_canopy_ratio_class_id ) REFERENCES osc_physrisk_structure.class_tree_canopy_ratio(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_class_vegetation_id FOREIGN KEY ( vegetation_primary_class_id ) REFERENCES osc_physrisk_structure.class_vegetation(core_id),
+ 	CONSTRAINT fk_structure_surrounding_ring_class_water_distance_id FOREIGN KEY ( water_distance_class_id ) REFERENCES osc_physrisk_structure.class_water_distance(core_id)
+);
+COMMENT ON TABLE osc_physrisk_structure.structure_surrounding_ring IS 'Ring information for a specific structure location. This includes information about the area surrounding the structure, within a certain inner and outer ring, that may influence its vulnerability to physical risks.';
+
+CREATE TABLE osc_physrisk_structure.bridge_structure_structure_component (
+	structure_id uuid NOT NULL,
+	structure_component_id uuid NOT NULL,
+	details_json jsonb,
+	PRIMARY KEY (structure_id,structure_component_id),
+	CONSTRAINT fk_bridge_structure_structure_component_structure_id FOREIGN KEY ( structure_id ) REFERENCES osc_physrisk_structure.structure(core_id),	
+	CONSTRAINT fk_bridge_structure_structure_component_structure_component_id FOREIGN KEY ( structure_component_id ) REFERENCES osc_physrisk_structure.structure_component(core_id)
+);
+COMMENT ON TABLE osc_physrisk_structure.bridge_structure_structure_component IS 'Many-to-many bridge between a structure and its internal components (HVAC, elevator, fire, electrical, etc) that a structure may contain, helpful for determining vulnerability or exposure.';
+
+CREATE TABLE osc_physrisk_structure.structure_construction (
+	core_id uuid NOT NULL,
+	core_name_short varchar(50),
+	core_name_full varchar(255),
+	core_name_suffix varchar(12),
+	core_name_prefix varchar(12),
+	core_description_short varchar(255),
+	core_description_full varchar(8096),
+	core_tags jsonb,
+	core_temporal_datetime_utc_created timestamptz NOT NULL,
+	core_user_creator_id bigint,
+	core_temporal_datetime_utc_last_modified timestamptz,
+	core_user_last_modifier_id bigint,
+	core_is_deleted bool NOT NULL,
+	core_user_deleter_id bigint,
+	core_temporal_datetime_utc_deleted timestamptz,
+	core_culture varchar(5),
+	core_checksum varchar(64),
+	core_seq_num integer,
+	core_translated_from_id uuid,
+	core_is_active bool NOT NULL,
+	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
+	structure_id uuid NOT NULL,
+	primary_construction_type_id uuid NOT NULL,
+	secondary_construction_type_id uuid,
+	details_json jsonb,
+	PRIMARY KEY (core_id),
+	CONSTRAINT fk_structure_construction_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_structure_construction_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
+	CONSTRAINT fk_structure_construction_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
+ 	CONSTRAINT fk_structure_construction_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id),
+	CONSTRAINT fk_structure_construction_structure_id FOREIGN KEY ( structure_id ) REFERENCES osc_physrisk_structure.structure(core_id),
+	CONSTRAINT fk_structure_construction_primary_construction_type_id FOREIGN KEY ( primary_construction_type_id ) REFERENCES osc_physrisk_structure.construction_type(core_id),
+	CONSTRAINT fk_structure_construction_secondary_construction_type_id FOREIGN KEY ( secondary_construction_type_id ) REFERENCES osc_physrisk_structure.construction_type(core_id)
+);
+COMMENT ON TABLE osc_physrisk_structure.structure_construction IS 'Helps define variables related to the type of construction of an asset, such as its material or manufacturing method, which can help establish potential vulnerability or exposure.';
+
+CREATE INDEX "IX_structure_construction_structure_id" ON osc_physrisk_structure.structure_construction USING btree (structure_id);
+CREATE INDEX "IX_structure_construction_core_checksum" ON osc_physrisk_structure.structure_construction USING btree (core_checksum);
+CREATE INDEX "IX_structure_construction_core_culture" ON osc_physrisk_structure.structure_construction USING btree (core_culture);
+CREATE INDEX "IX_structure_construction_core_data_set_id" ON osc_physrisk_structure.structure_construction USING btree (core_data_set_id);
+CREATE INDEX "IX_structure_construction_core_id" ON osc_physrisk_structure.structure_construction USING btree (core_id);
+CREATE INDEX "IX_structure_construction_core_user_creator_id" ON osc_physrisk_structure.structure_construction USING btree (core_user_creator_id);
+CREATE INDEX "IX_structure_construction_core_user_deleter_id" ON osc_physrisk_structure.structure_construction USING btree (core_user_deleter_id);
+CREATE INDEX "IX_structure_construction_core_user_last_modifier_id" ON osc_physrisk_structure.structure_construction USING btree (core_user_last_modifier_id);
+CREATE INDEX "IX_structure_construction_primary_construction_type_id" ON osc_physrisk_structure.structure_construction USING btree (primary_construction_type_id);
+CREATE INDEX "IX_structure_construction_secondary_construction_type_id" ON osc_physrisk_structure.structure_construction USING btree (secondary_construction_type_id);
+CREATE UNIQUE INDEX "PK_structure_construction" ON osc_physrisk_structure.structure_construction USING btree (core_id);
 
 -- CREATE SCHEMA osc_physrisk_assets
 CREATE TABLE osc_physrisk_asset.asset_class (
@@ -1095,91 +1311,6 @@ CREATE TABLE osc_physrisk_asset.asset_type (
 	CONSTRAINT fk_generic_asset_asset_class_id FOREIGN KEY ( asset_class_id ) REFERENCES osc_physrisk_asset.asset_class(core_id)	
 );
 COMMENT ON TABLE osc_physrisk_asset.asset_type IS 'A physical financial asset (infrastructure, utilities, property, buildings) specific classification within an overarching asset class, that may impact the modeling (ex commercial real estate vs residential real, both of which types belong to the same real estate class).';
-
-
-CREATE TABLE osc_physrisk_asset.construction_type (
-	core_id uuid NOT NULL,
-	core_name_short varchar(50),
-	core_name_full varchar(255),
-	core_name_suffix varchar(12),
-	core_name_prefix varchar(12),
-	core_description_short varchar(255),
-	core_description_full varchar(8096),
-	core_tags jsonb,
-	core_temporal_datetime_utc_created timestamptz NOT NULL,
-	core_user_creator_id bigint,
-	core_temporal_datetime_utc_last_modified timestamptz,
-	core_user_last_modifier_id bigint,
-	core_is_deleted bool NOT NULL,
-	core_user_deleter_id bigint,
-	core_temporal_datetime_utc_deleted timestamptz,
-	core_culture varchar(5),
-	core_checksum varchar(64),
-	core_seq_num integer,
-	core_translated_from_id uuid,
-	core_is_active bool NOT NULL,
-	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
-	open_exposure_data_oed_code integer NOT NULL,
-	open_exposure_data_cede_code varchar(50) NOT NULL,
-	open_exposure_data_code_range varchar(50) NOT NULL,
-	open_exposure_data_broad_category varchar(50) NOT NULL,
-	
-	PRIMARY KEY (core_id),
-	CONSTRAINT fk_construction_type_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
-	CONSTRAINT fk_construction_type_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
-	CONSTRAINT fk_construction_type_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
- 	CONSTRAINT fk_construction_type_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
-);
-COMMENT ON TABLE osc_physrisk_asset.construction_type IS 'The type of construction method or material an asset is made of, helpful for determining vulnerability or exposure.';
-
-CREATE INDEX "IX_construction_type_core_checksum" ON osc_physrisk_asset.construction_type USING btree (core_checksum);
-CREATE INDEX "IX_construction_type_core_culture" ON osc_physrisk_asset.construction_type USING btree (core_culture);
-CREATE INDEX "IX_construction_type_core_data_set_id" ON osc_physrisk_asset.construction_type USING btree (core_data_set_id);
-CREATE INDEX "IX_construction_type_core_id" ON osc_physrisk_asset.construction_type USING btree (core_id);
-CREATE INDEX "IX_construction_type_core_user_creator_id" ON osc_physrisk_asset.construction_type USING btree (core_user_creator_id);
-CREATE INDEX "IX_construction_type_core_user_deleter_id" ON osc_physrisk_asset.construction_type USING btree (core_user_deleter_id);
-CREATE INDEX "IX_construction_type_core_user_last_modifier_id" ON osc_physrisk_asset.construction_type USING btree (core_user_last_modifier_id);
-CREATE UNIQUE INDEX "PK_construction_type" ON osc_physrisk_asset.construction_type USING btree (core_id);
-
-CREATE TABLE osc_physrisk_asset.building_system (
-	core_id uuid NOT NULL,
-	core_name_short varchar(50),
-	core_name_full varchar(255),
-	core_name_suffix varchar(12),
-	core_name_prefix varchar(12),
-	core_description_short varchar(255),
-	core_description_full varchar(8096),
-	core_tags jsonb,
-	core_temporal_datetime_utc_created timestamptz NOT NULL,
-	core_user_creator_id bigint,
-	core_temporal_datetime_utc_last_modified timestamptz,
-	core_user_last_modifier_id bigint,
-	core_is_deleted bool NOT NULL,
-	core_user_deleter_id bigint,
-	core_temporal_datetime_utc_deleted timestamptz,
-	core_culture varchar(5),
-	core_checksum varchar(64),
-	core_seq_num integer,
-	core_translated_from_id uuid,
-	core_is_active bool NOT NULL,
-	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
-	
-	PRIMARY KEY (core_id),
-	CONSTRAINT fk_building_system_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
-	CONSTRAINT fk_building_system_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
-	CONSTRAINT fk_building_system_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
- 	CONSTRAINT fk_building_system_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id)
-);
-COMMENT ON TABLE osc_physrisk_asset.building_system IS 'The type of internal components (HVAC, elevator, fire, electrical, etc) that an asset contains, helpful for determining vulnerability or exposure.';
-
-CREATE INDEX "IX_building_system_core_checksum" ON osc_physrisk_asset.building_system USING btree (core_checksum);
-CREATE INDEX "IX_building_system_core_culture" ON osc_physrisk_asset.building_system USING btree (core_culture);
-CREATE INDEX "IX_building_system_core_data_set_id" ON osc_physrisk_asset.building_system USING btree (core_data_set_id);
-CREATE INDEX "IX_building_system_core_id" ON osc_physrisk_asset.building_system USING btree (core_id);
-CREATE INDEX "IX_building_system_core_user_creator_id" ON osc_physrisk_asset.building_system USING btree (core_user_creator_id);
-CREATE INDEX "IX_building_system_core_user_deleter_id" ON osc_physrisk_asset.building_system USING btree (core_user_deleter_id);
-CREATE INDEX "IX_building_system_core_user_last_modifier_id" ON osc_physrisk_asset.building_system USING btree (core_user_last_modifier_id);
-CREATE UNIQUE INDEX "PK_building_system" ON osc_physrisk_asset.building_system USING btree (core_id);
 
 
 CREATE TABLE osc_physrisk_asset.generic_asset (
@@ -1247,120 +1378,15 @@ CREATE TABLE osc_physrisk_asset.generic_asset (
 );
 COMMENT ON TABLE osc_physrisk_asset.generic_asset IS 'A physical financial asset (infrastructure, utilities, property, buildings) that is contained within a financial portfolio and not further classified by its Asset Type (otherwise use a more specific, relevant table). The lowest unit of assessment for physical risk & resilience (currently).';
 
-
-CREATE TABLE osc_physrisk_asset_surrounding.asset_surrounding_ring (
-	core_id uuid NOT NULL,
-	core_name_short varchar(50),
-	core_name_full varchar(255),
-	core_name_suffix varchar(12),
-	core_name_prefix varchar(12),
-	core_description_short varchar(255),
-	core_description_full varchar(8096),
-	core_tags jsonb,
-	core_temporal_datetime_utc_created timestamptz NOT NULL,
-	core_user_creator_id bigint,
-	core_temporal_datetime_utc_last_modified timestamptz,
-	core_user_last_modifier_id bigint,
-	core_is_deleted bool NOT NULL,
-	core_user_deleter_id bigint,
-	core_temporal_datetime_utc_deleted timestamptz,
-	core_culture varchar(5),
-	core_checksum varchar(64),
-	core_seq_num integer,
-	core_translated_from_id uuid,
-	core_is_active bool NOT NULL,
-	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,	
+CREATE TABLE osc_physrisk_asset.bridge_asset_structure (
+	structure_id uuid NOT NULL,
 	asset_id uuid NOT NULL,
-	perimeter_ring_id uuid NOT NULL,
-	defensible_space_class_id uuid,
-	impervious_ratio_class_id uuid,
-	impervious_ratio numeric(5,2),
-	land_cover_primary_class_id uuid,
-	land_use_primary_class_id uuid,
-	slope_class_id uuid,
-	slope_degrees numeric(5,2),
-	tree_canopy_ratio_class_id uuid,
-	tree_canopy_ratio numeric(5,2),
-	vegetation_primary_class_id uuid,
-	water_distance_class_id uuid,
-	water_distance_metres numeric(5,2),
-	PRIMARY KEY (core_id),
-	CONSTRAINT fk_asset_surrounding_ring_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
-	CONSTRAINT fk_asset_surrounding_ring_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
-	CONSTRAINT fk_asset_surrounding_ring_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
- 	CONSTRAINT fk_asset_surrounding_ring_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id),
- 	--CONSTRAINT fk_asset_surrounding_ring_asset_id FOREIGN KEY ( asset_id ) REFERENCES osc_physrisk_asset.generic_asset(core_id),
- 	CONSTRAINT fk_asset_surrounding_ring_class_perimeter_ring_id FOREIGN KEY ( perimeter_ring_id ) REFERENCES osc_physrisk_asset_surrounding.perimeter_ring(core_id),
- 	CONSTRAINT fk_asset_surrounding_ring_class_defensible_space_id FOREIGN KEY ( defensible_space_class_id ) REFERENCES osc_physrisk_asset_surrounding.class_defensible_space(core_id),
- 	CONSTRAINT fk_asset_surrounding_ring_class_impervious_ratio_id FOREIGN KEY ( impervious_ratio_class_id ) REFERENCES osc_physrisk_asset_surrounding.class_impervious_ratio(core_id),
- 	CONSTRAINT fk_asset_surrounding_ring_class_class_primary_land_cover_id_id FOREIGN KEY ( land_cover_primary_class_id ) REFERENCES osc_physrisk_asset_surrounding.class_land_cover(core_id),
- 	CONSTRAINT fk_asset_surrounding_ring_class_primary_land_use_id FOREIGN KEY ( land_use_primary_class_id ) REFERENCES osc_physrisk_asset_surrounding.class_land_use(core_id),
- 	CONSTRAINT fk_asset_surrounding_ring_class_slope_id FOREIGN KEY ( slope_class_id ) REFERENCES osc_physrisk_asset_surrounding.class_slope(core_id),
- 	CONSTRAINT fk_asset_surrounding_ring_class_tree_canopy_ratio_id FOREIGN KEY ( tree_canopy_ratio_class_id ) REFERENCES osc_physrisk_asset_surrounding.class_tree_canopy_ratio(core_id),
- 	CONSTRAINT fk_asset_surrounding_ring_class_vegetation_id FOREIGN KEY ( vegetation_primary_class_id ) REFERENCES osc_physrisk_asset_surrounding.class_vegetation(core_id),
- 	CONSTRAINT fk_asset_surrounding_ring_class_water_distance_id FOREIGN KEY ( water_distance_class_id ) REFERENCES osc_physrisk_asset_surrounding.class_water_distance(core_id)
-);
-
-COMMENT ON TABLE osc_physrisk_asset_surrounding.asset_surrounding_ring IS 'Ring information for a specific asset location. This includes information about the area surrounding the asset, within a certain inner and outer ring, that may influence its vulnerability to physical risks.';
-
-CREATE TABLE osc_physrisk_asset.bridge_asset_building_system (
-	asset_id uuid NOT NULL,
-	building_system_id uuid NOT NULL,
 	details_json jsonb,
-	PRIMARY KEY (asset_id,building_system_id),
-	CONSTRAINT fk_bridge_asset_building_system_asset_id FOREIGN KEY ( asset_id ) REFERENCES osc_physrisk_asset.generic_asset(core_id),	
-	CONSTRAINT fk_bridge_asset_building_system_building_system_id FOREIGN KEY ( building_system_id ) REFERENCES osc_physrisk_asset.building_system(core_id)
+	PRIMARY KEY (structure_id, asset_id),
+	CONSTRAINT fk_bridge_asset_structure_structure_id FOREIGN KEY ( structure_id ) REFERENCES osc_physrisk_structure.structure(core_id)
+	--CONSTRAINT fk_bridge_asset_structure_asset_id FOREIGN KEY ( asset_id ) REFERENCES osc_physrisk_asset.generic_asset(core_id)
 );
-COMMENT ON TABLE osc_physrisk_asset.bridge_asset_building_system IS 'Many-to-many bridge between an asset and its internal components (HVAC, elevator, fire, electrical, etc) that an asset contains, helpful for determining vulnerability or exposure.';
-
-CREATE TABLE osc_physrisk_asset.asset_construction (
-	core_id uuid NOT NULL,
-	core_name_short varchar(50),
-	core_name_full varchar(255),
-	core_name_suffix varchar(12),
-	core_name_prefix varchar(12),
-	core_description_short varchar(255),
-	core_description_full varchar(8096),
-	core_tags jsonb,
-	core_temporal_datetime_utc_created timestamptz NOT NULL,
-	core_user_creator_id bigint,
-	core_temporal_datetime_utc_last_modified timestamptz,
-	core_user_last_modifier_id bigint,
-	core_is_deleted bool NOT NULL,
-	core_user_deleter_id bigint,
-	core_temporal_datetime_utc_deleted timestamptz,
-	core_culture varchar(5),
-	core_checksum varchar(64),
-	core_seq_num integer,
-	core_translated_from_id uuid,
-	core_is_active bool NOT NULL,
-	core_data_set_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid NOT NULL,
-	asset_id uuid NOT NULL,
-	primary_construction_type_id uuid NOT NULL,
-	secondary_construction_type_id uuid,
-	details_json jsonb,
-	PRIMARY KEY (core_id),
-	CONSTRAINT fk_asset_construction_core_user_creator_id FOREIGN KEY ( core_user_creator_id ) REFERENCES osc_physrisk_backend.user(core_id),
-	CONSTRAINT fk_asset_construction_core_user_last_modifier_id FOREIGN KEY ( core_user_last_modifier_id ) REFERENCES osc_physrisk_backend.user(core_id),
-	CONSTRAINT fk_asset_construction_core_user_deleter_id FOREIGN KEY ( core_user_deleter_id ) REFERENCES osc_physrisk_backend.user(core_id),
- 	CONSTRAINT fk_asset_construction_core_data_set_id FOREIGN KEY ( core_data_set_id ) REFERENCES osc_physrisk_backend.data_set(core_id),
-	CONSTRAINT fk_asset_construction_asset_id FOREIGN KEY ( asset_id ) REFERENCES osc_physrisk_asset.generic_asset(core_id),
-	CONSTRAINT fk_asset_construction_primary_construction_type_id FOREIGN KEY ( primary_construction_type_id ) REFERENCES osc_physrisk_asset.construction_type(core_id),
-	CONSTRAINT fk_asset_construction_secondary_construction_type_id FOREIGN KEY ( secondary_construction_type_id ) REFERENCES osc_physrisk_asset.construction_type(core_id)
-);
-COMMENT ON TABLE osc_physrisk_asset.asset_construction IS 'Helps define variables related to the type of construction of an asset, such as its material or manufacturing method, which can help establish potential vulnerability or exposure.';
-
-CREATE INDEX "IX_asset_construction_asset_id" ON osc_physrisk_asset.asset_construction USING btree (asset_id);
-CREATE INDEX "IX_asset_construction_core_checksum" ON osc_physrisk_asset.asset_construction USING btree (core_checksum);
-CREATE INDEX "IX_asset_construction_core_culture" ON osc_physrisk_asset.asset_construction USING btree (core_culture);
-CREATE INDEX "IX_asset_construction_core_data_set_id" ON osc_physrisk_asset.asset_construction USING btree (core_data_set_id);
-CREATE INDEX "IX_asset_construction_core_id" ON osc_physrisk_asset.asset_construction USING btree (core_id);
-CREATE INDEX "IX_asset_construction_core_user_creator_id" ON osc_physrisk_asset.asset_construction USING btree (core_user_creator_id);
-CREATE INDEX "IX_asset_construction_core_user_deleter_id" ON osc_physrisk_asset.asset_construction USING btree (core_user_deleter_id);
-CREATE INDEX "IX_asset_construction_core_user_last_modifier_id" ON osc_physrisk_asset.asset_construction USING btree (core_user_last_modifier_id);
-CREATE INDEX "IX_asset_construction_primary_construction_type_id" ON osc_physrisk_asset.asset_construction USING btree (primary_construction_type_id);
-CREATE INDEX "IX_asset_construction_secondary_construction_type_id" ON osc_physrisk_asset.asset_construction USING btree (secondary_construction_type_id);
-CREATE UNIQUE INDEX "PK_asset_construction" ON osc_physrisk_asset.asset_construction USING btree (core_id);
+COMMENT ON TABLE osc_physrisk_asset.bridge_asset_structure IS 'Many-to-many bridge between a physical financial asset and its physical structure(s)';
 
 CREATE TABLE osc_physrisk_asset.asset_operator (
 	core_id uuid NOT NULL,
@@ -1914,8 +1940,8 @@ COMMENT ON TABLE osc_physrisk_analysis.asset_financial_impact IS 'The financial 
 --GRANT SELECT ON ALL TABLES IN SCHEMA "osc_physrisk_model" TO physrisk_reader_service;
 --GRANT USAGE ON SCHEMA "osc_physrisk_assets" TO physrisk_reader_service;
 --GRANT SELECT ON ALL TABLES IN SCHEMA "osc_physrisk_assets" TO physrisk_reader_service;
---GRANT USAGE ON SCHEMA "osc_physrisk_asset_surrounding" TO physrisk_reader_service;
---GRANT SELECT ON ALL TABLES IN SCHEMA "osc_physrisk_asset_surrounding" TO physrisk_reader_service;
+--GRANT USAGE ON SCHEMA "osc_physrisk_structure" TO physrisk_reader_service;
+--GRANT SELECT ON ALL TABLES IN SCHEMA "osc_physrisk_structure" TO physrisk_reader_service;
 --GRANT USAGE ON SCHEMA "osc_physrisk_analysis" TO physrisk_reader_service;
 --GRANT SELECT ON ALL TABLES IN SCHEMA "osc_physrisk_analysis" TO physrisk_reader_service;
 --GRANT USAGE ON SCHEMA "osc_physrisk_analysis" TO physrisk_reader_service;
@@ -1930,8 +1956,8 @@ COMMENT ON TABLE osc_physrisk_analysis.asset_financial_impact IS 'The financial 
 --GRANT ALL ON ALL TABLES IN SCHEMA "osc_physrisk_model" TO physrisk_readerwriter_service;
 --GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "osc_physrisk_assets" TO physrisk_readerwriter_service;
 --GRANT ALL ON ALL TABLES IN SCHEMA "osc_physrisk_assets" TO physrisk_readerwriter_service;
---GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "osc_physrisk_asset_surrounding" TO physrisk_readerwriter_service;
---GRANT ALL ON ALL TABLES IN SCHEMA "osc_physrisk_asset_surrounding" TO physrisk_readerwriter_service;
+--GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "osc_physrisk_structure" TO physrisk_readerwriter_service;
+--GRANT ALL ON ALL TABLES IN SCHEMA "osc_physrisk_structure" TO physrisk_readerwriter_service;
 --GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "osc_physrisk_analysis" TO physrisk_readerwriter_service;
 --GRANT ALL ON ALL TABLES IN SCHEMA "osc_physrisk_analysis" TO physrisk_readerwriter_service;
 --GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "osc_physrisk_analysis" TO physrisk_readerwriter_service;
